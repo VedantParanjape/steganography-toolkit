@@ -1,6 +1,8 @@
 import os
 from PIL import Image
 import sys
+from math import sqrt
+from random import randrange
 
 def convert_to_binary(string_):
     binary = []
@@ -8,6 +10,14 @@ def convert_to_binary(string_):
         binary.append(format(ord(i),'08b'))
 
     return binary
+
+def convert_to_ascii(data):
+    ascii = []
+
+    for i in data:
+        ascii.append(ord(i))
+
+    return ascii
 
 def modify_pixels(pixels, string):
     binary = convert_to_binary(string)
@@ -46,6 +56,25 @@ def modify_pixels(pixels, string):
     
     return modified_pixels
 
+def modify_pixels_ascii(im, data):
+    ascii_list = convert_to_ascii(data)
+    pixels = iter(im.getdata())
+    length = len(ascii_list)
+    modifed_pixels = []
+    counter = 0
+
+    for j in pixels:
+        if counter > length - 1:
+            break
+        
+        i = [int(k) for k in j]
+        i[0] = ascii_list[counter]
+        counter = counter + 1
+        i = tuple(i)
+        modifed_pixels.append(i)
+
+    return modifed_pixels    
+
 def encode(pixels, text):
     w = pixels.size[0]
     (x, y) = (0, 0)
@@ -53,6 +82,19 @@ def encode(pixels, text):
     for pxls in modify_pixels(pixels.getdata(), text):
         pixels.putpixel((x,y),pxls)
 
+        if x == w - 1:
+            x = 0
+            y = y + 1
+        else:
+            x = x + 1
+
+def encode_ascii(im,data):
+    w = im.size[0]
+    (x, y) = (0, 0)
+
+    for pxls in modify_pixels_ascii(im, data):
+        im.putpixel((x,y),pxls)
+        
         if x == w - 1:
             x = 0
             y = y + 1
@@ -80,10 +122,16 @@ def decode(pixels):
         if pix[-1]%2 != 0:
             return str_data
 
+def decode_ascii(im):
+    pixels = iter(im.getdata())
 
-# im = Image.open('vedant.png')
-# px = im.load()
-# str_in = input("enter a string: ")
+    decoded_string = ''
+
+    for i in pixels:
+        if i[0] > 130:
+            break
+        decoded_string = decoded_string + chr(i[0])
+    return decoded_string
 
 def main():
     if sys.argv[1] == '-e':
@@ -101,22 +149,62 @@ def main():
         encode(im,string)
         im.save(output_name)
 
+    elif sys.argv[1] == '-ea':
+        imgdim = int(sqrt(len(sys.argv[3]))+1)
+
+        if imgdim**2 < 1000*1000:
+            imgdim = 1000
+
+        im = Image.new(mode = "RGB", size = (imgdim, imgdim))
+        output_name = sys.argv[2]
+        string = sys.argv[3]
+        px = im.load()
+
+        for i in range(0,randrange(im.size[0]-1)):
+            for j in range(0,randrange(im.size[1]-1)):
+                px[j,i] = (randrange(140,250), randrange(140,250), randrange(140,250))
+
+        if sys.argv[3].find('.') >=0:
+            if sys.argv[3].split('.')[1] == 'txt':
+                file = open(sys.argv[3],'r')
+                string = file.read()
+                file.close()
+                print("read from file:", sys.argv[3])
+        
+        encode_ascii(im,string)
+        im.save(output_name)
+
     elif sys.argv[1] == '-d':
         im = Image.open(sys.argv[2])
-        if sys.argv[3] == '-f':
-            file = open(sys.argv[4],'a+')
-            file.truncate(0)
-            file.write(decode(im))
-            file.close()
+        if len(sys.argv) > 3:
+            if sys.argv[3] == '-f':
+                file = open(sys.argv[4],'a+')
+                file.truncate(0)
+                file.write(decode(im))
+                file.close()
         else:
             print(decode(im))
 
+    elif sys.argv[1] == '-da':
+        im = Image.open(sys.argv[2])
+        if len(sys.argv) > 3:
+            if sys.argv[3] == '-f':
+                file = open(sys.argv[4],'a+')
+                file.truncate(0)
+                file.write(decode_ascii(im))
+                file.close()
+        else:
+            print(decode_ascii(im))
+    
     else:
-        for i in sys.argv:
-            print(i)
-
-        print('usage: -e [file_name] [out_filename] [string]')
-        print('       -d [file_name]')
+        print('usage: -e  [input_filename] [output_filename] [string]')
+        print('       -e  [input_filename] [output_filename] [data_input_filename]')
+        print('       -ea [output_filename] [string]')
+        print('       -ea [output_filename] [data_input_filename]')
+        print('       -d  [input_filename]')
+        print('       -d  [input_filename] -f [output_filename]')
+        print('       -da [input_filename]')
+        print('       -da [input_filename] -f [output_filename]')
 
 if __name__ == '__main__':
     main()
