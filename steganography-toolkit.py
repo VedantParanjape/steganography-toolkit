@@ -32,16 +32,13 @@ def modify_pixels(pixels, string):
 
         for j in range(0,8):
             if binary[i][j] == '0' and pix[j]%2 != 0:
-                if pix[j] != 0:
-                    pix[j] = pix[j] - 1
-                else:
-                    pix[j] = pix[j] - 1
+                pix[j] = pix[j] - 1
 
             elif binary[i][j] == '1' and pix[j]%2 == 0:
-                if pix[j] != 0:
+                if pix[j] != '0':
                     pix[j] = pix[j] - 1
-                else:
-                    pix[j] = pix[j] - 1
+                elif pix[j] == '0':
+                    pix[j] = pix[j] + 1
 
         if i == length - 1:
             if pix[-1]%2 == 0:
