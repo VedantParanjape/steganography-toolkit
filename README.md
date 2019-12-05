@@ -1,6 +1,6 @@
 # steganography-toolkit
 
-A toolkit to hide data in image using steganography techniques
+A toolkit to hide data in an image using steganography techniques
 
 # Usage
 
@@ -24,5 +24,5 @@ example: python3 steganography.py -e vedant.png encoded.png vedant_rocks
 ```
 
 # Requirements
-`python 3.6+`  
-`python PIL`
+`Python 3.6+`  
+`Python PIL`
