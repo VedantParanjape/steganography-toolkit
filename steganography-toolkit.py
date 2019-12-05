@@ -35,9 +35,9 @@ def modify_pixels(pixels, string):
                 pix[j] = pix[j] - 1
 
             elif binary[i][j] == '1' and pix[j]%2 == 0:
-                if pix[j] != '0':
+                if pix[j] != 0:
                     pix[j] = pix[j] - 1
-                elif pix[j] == '0':
+                elif pix[j] == 0:
                     pix[j] = pix[j] + 1
 
         if i == length - 1:
